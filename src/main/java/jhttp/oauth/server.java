@@ -49,8 +49,8 @@ public class server {
         this.googleSecret = "";
         
         //DISCORD
-        this.discordID = "1163836851551998013";
-        this.discordSecret = "Iiv0Ftvzu4TmDGb_-vdGcI8HAc6ht9Gj";
+        this.discordID = "";
+        this.discordSecret = "";
     }
     
     public void start() throws IOException {
