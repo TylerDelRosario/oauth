@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package jhttp.oauth.google;
+package jhttp.oauth.discord;
 
 /**
  *
@@ -20,9 +20,8 @@ import java.util.Map;
 import java.util.HashMap;
 import org.json.JSONObject;
 
-public class googleTokenHandler implements HttpHandler {
+public class discordTokenHandler implements HttpHandler{
     private String code;
-    private String scope;
     private String redirect;
     private String clientID;
     private String clientSecret;
@@ -31,41 +30,34 @@ public class googleTokenHandler implements HttpHandler {
     private JSONObject tokenJSON;
     private JSONObject userData;
     
-    public googleTokenHandler(String clientID, String clientSecret, HttpClient client) {
+    public discordTokenHandler(String clientID, String clientSecret, HttpClient client) {
         this.clientID = clientID;
         this.clientSecret = clientSecret;
-        this.redirect = "http://localhost:8000/auth/google/callback";
         this.httpClient = client;
+        this.redirect = "http://localhost:8000/auth/discord/callback";
     }
     
     @Override
     public void handle(HttpExchange request) throws IOException {
         Map<String, String> parameters = parseURI(request.getRequestURI());
         this.code = parameters.get("code");
-        this.scope = parameters.get("scope");
         
-        googleTokenRequest tokenReq = new googleTokenRequest(code, redirect, clientID, clientSecret, httpClient);
+        //System.out.println(this.code);
+        discordTokenRequest tokenReq = new discordTokenRequest(code, redirect, clientID, clientSecret, httpClient);
         this.tokenJSON = new JSONObject(tokenReq.httpRequest());
-        
         String accessToken = tokenJSON.get("access_token").toString();
         String tokenType = tokenJSON.get("token_type").toString();
         
-        googleDataRequest dataReq = new googleDataRequest(accessToken, tokenType, httpClient);
+        System.out.println(accessToken);
+        discordDataRequest dataReq = new discordDataRequest(accessToken, tokenType, httpClient);
         this.userData = new JSONObject(dataReq.httpRequest());
-        
-        //Below is completely optional and for display purposes only.
-        //From here we can store the data we need and redirect user to proper page.
-        String response = "<html><head><title>Hello Oauth!</title></head><body>";
-        response += "<h1>Oauth response:</h1>";
-        response += "<img src='" + userData.get("picture") + "' alt='" + userData.get("name") + " Profile Picture'/>";
-        response += "<h4>Username: " + userData.get("name") + "</h4>";
-        response += "<h4>UserID: " + userData.get("id") + "</h4>";
-        response += "</body></html>";
         
         Headers res = request.getResponseHeaders();
         
         res.add("Content-Type", "text/html");
         res.add("Date", new Date().toString());
+        
+        String response = this.buildResponse(userData);
         
         request.sendResponseHeaders(200, response.length());
         OutputStream os = request.getResponseBody();
@@ -73,7 +65,7 @@ public class googleTokenHandler implements HttpHandler {
         os.close();
     }
     
-    public Map<String, String> parseURI(URI reqURI) {
+    private Map<String, String> parseURI(URI reqURI) {
         Map<String, String> parameters = new HashMap<>();
         String[] uriSplit = reqURI.getQuery().split("&");
         
@@ -85,4 +77,13 @@ public class googleTokenHandler implements HttpHandler {
         return parameters;
     }
     
+    private String buildResponse(JSONObject userData) {
+        String response = "<html><head><title>Hello Oauth!</title></head><body>";
+        response += "<h1>Oauth response:</h1>";
+        response += "<img src='https://cdn.discordapp.com/avatars/" + userData.get("id") + "/" + userData.get("avatar") + "' alt='User Profile Picture'";
+        response += "<p>Global Name: " + userData.get("global_name") + "</p>";
+        response += "<p>UserID: " + userData.get("id") + "</p>";
+        
+        return response;
+    }
 }

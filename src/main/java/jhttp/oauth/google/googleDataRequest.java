@@ -14,20 +14,20 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.net.URI;
 import java.io.IOException;
-import java.time.Duration;
 
 public class googleDataRequest {
     private String accessToken;
     private String tokenType;
+    private HttpClient client;
     
-    public googleDataRequest(String initToken, String initType) {
+    public googleDataRequest(String initToken, String initType, HttpClient client) {
         this.accessToken = initToken;
         this.tokenType = initType;
+        this.client = client;
     }
     
     public String httpRequest() {
         HttpRequest request = this.buildRequest();
-        HttpClient client = this.buildClient();
         HttpResponse<String> response = null;
         
         try {
@@ -58,12 +58,5 @@ public class googleDataRequest {
                 .build();
         
         return request;
-    }
-    
-    private HttpClient buildClient() {
-        return HttpClient.newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)
-                .connectTimeout(Duration.ofSeconds(20))
-                .build();
     }
 }

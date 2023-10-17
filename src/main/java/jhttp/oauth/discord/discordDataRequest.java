@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package jhttp.oauth.google;
+package jhttp.oauth.discord;
 
 /**
  *
@@ -10,26 +10,20 @@ package jhttp.oauth.google;
  */
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.io.IOException;
+import java.time.Duration;
 
-public class googleTokenRequest {
-    private String code;
-    private String redirect;
-    private String clientID;
-    private String clientSecret;
+public class discordDataRequest {
+    private String accessToken;
+    private String tokenType;
     private HttpClient client;
     
-    public googleTokenRequest(String initCode, String initRedirect, String initID, String initSecret, HttpClient client) {
-        this.code = initCode;
-        this.redirect = URLEncoder.encode(initRedirect, StandardCharsets.UTF_8);
-        this.clientID = initID;
-        this.clientSecret = initSecret;
+    public discordDataRequest(String initToken, String initType, HttpClient client) {
+        this.accessToken = initToken;
+        this.tokenType = initType;
         this.client = client;
     }
     
@@ -52,17 +46,18 @@ public class googleTokenRequest {
             return response.body();
         }
         
-        return "ERROR: Response from googleTokenRequest is null!";
+        return "ERROR: discordTokenRequest response is null!";
     }
     
     private HttpRequest buildRequest() {
-        URI url = URI.create("https://accounts.google.com/o/oauth2/token");
-        String body = "code=" + code + "&redirect_uri=" + redirect + "&client_id=" + clientID + "&client_secret=" + clientSecret + "&scope=&grant_type=authorization_code";
+        URI url = URI.create("https://discord.com/api/users/@me");
+        
+        String authString = " " + tokenType + " " + accessToken;
         
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
-                .header("content-type", "application/x-www-form-urlencoded")
-                .POST(BodyPublishers.ofString(body))
+                .header("Authorization", authString)
+                .GET()//default method, but I like to be explicit
                 .build();
         
         return request;

@@ -12,13 +12,20 @@ package jhttp.oauth;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
 import java.io.IOException;
+import java.net.http.HttpClient;
+import java.time.Duration;
 
 //import classes from adjacent google folder.
 import jhttp.oauth.google.googleAuthHandler;
 import jhttp.oauth.google.googleTokenHandler;
 
+//discord classes
+import jhttp.oauth.discord.discordAuthHandler;
+import jhttp.oauth.discord.discordTokenHandler;
+
 public class server {
     private HttpServer server;
+    private HttpClient client;
     private int port;
     
     //GOOGLE ID AND SECRET
@@ -32,6 +39,7 @@ public class server {
     public server(int initPort) {
         this.port = initPort;
         this.server = null;
+        this.client = this.buildClient();
         
         //GOOGLE
         //Ideally, I would store these in some sort of env variable, but I'm
@@ -41,8 +49,8 @@ public class server {
         this.googleSecret = "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";
         
         //DISCORD
-        this.discordID = null;
-        this.discordSecret = null;
+        this.discordID = "1163836851551998013";
+        this.discordSecret = "Iiv0Ftvzu4TmDGb_-vdGcI8HAc6ht9Gj";
     }
     
     public void start() throws IOException {
@@ -60,11 +68,23 @@ public class server {
     
     public void createGoogleContext() {
         server.createContext("/auth/google", new googleAuthHandler(googleID));
-        server.createContext("/auth/google/callback", new googleTokenHandler(googleID, googleSecret));
+        server.createContext("/auth/google/callback", new googleTokenHandler(googleID, googleSecret, client));
     }
     
     public void createDiscordContext() {
-        //server.createContext("/auth/discord", null);
-        //server.createContext("/auth/discord/callback", null);
+        server.createContext("/auth/discord", new discordAuthHandler(discordID));
+        server.createContext("/auth/discord/callback", new discordTokenHandler(discordID, discordSecret, client));
+    }
+    
+    public void createGithubContext() {
+    //    server.createContext("/auth/github", null);
+    //    server.createContext("/auth/github/callback", null);
+    }
+    
+    private HttpClient buildClient() {
+        return HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .connectTimeout(Duration.ofSeconds(20))
+                .build();
     }
 }
