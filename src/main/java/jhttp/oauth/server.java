@@ -37,8 +37,8 @@ public class server {
         //Ideally, I would store these in some sort of env variable, but I'm
         //still learning and figuring out java and maven so I've been
         //sticking to this for now.
-        this.googleID = "684021548761-aogqulml24qr2au9mv1hvo92do99b2mb.apps.googleusercontent.com";
-        this.googleSecret = "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";
+        this.googleID = "";
+        this.googleSecret = "";
         
         //DISCORD
         this.discordID = null;
